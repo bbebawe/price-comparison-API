@@ -1,0 +1,137 @@
+/* global styles 
+===================*/
+.wrapper {
+    min-height: calc(100vh - 150px);
+}
+
+[v-cloak] {
+    display: none;
+}
+
+header,
+footer {
+    background-color: #2e4056;
+    color: aliceblue;
+}
+
+.jumbotron {
+    margin: 20px;
+    padding: 20px;
+}
+
+footer {
+    margin-top: 50px;
+}
+
+/* navigation menu styles
+  ===================*/
+#logo {
+    /* height: 30px; */
+    margin: 10px;
+}
+
+#logo:hover {
+    opacity: .5;
+}
+
+.search-btn {
+    display: inline-block;
+    font-weight: bold;
+    color: aliceblue;
+}
+
+.product-block {
+    margin-bottom: 10px;
+}
+
+.product-item {
+    padding: 10px;
+    box-shadow: #2e4056 0 0 5px;
+
+}
+
+.list-group {
+    list-style-type: none;
+}
+
+.product-image {
+    display: inline-block;
+    width: 120px;
+    height: 1200px;
+    max-width: 120px;
+    max-height: 120px;
+    margin: auto;
+}
+
+.supermarket-image {
+    /* 
+    height: 50px;
+    max-height: 50px;
+    width: 120px;
+    max-width: 120px; */
+    margin-bottom: 20px;
+}
+
+.store-btn {
+    display: inline-block;
+    text-align: center;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* category-card styles 
+=========================*/
+.category-block a {
+    font-size: 16px;
+    color: black;
+    text-align: center;
+
+}
+
+.category-name {
+    font-size: 16px;
+    margin: 0px;
+    padding: 10px 0px;
+}
+
+.category-card {
+    padding: 10px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: #2e4056 0 0 5px;
+}
+
+.category-card img {
+    margin: 5px auto;
+    max-width: 120px;
+    height: 120px;
+
+}
+
+.category-card:hover {
+    opacity: .7;
+}
+
+.category-card a:hover {
+    text-decoration-line: none;
+}
+
+.item-block a {
+    font-size: 16px;
+    color: black;
+    text-align: center;
+}
+
+.main-heading {
+    background-color: #2e4056;
+    /* color: rgba(0, 255, 128, 0.76); */
+    color: aliceblue;
+    font-family: "Finger Paint", cursive;
+    padding: 5px;
+    text-align: center;
+    box-shadow: #2e4056 0 0 20px;
+    border-radius: 20px;
+    font-weight: normal;
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
