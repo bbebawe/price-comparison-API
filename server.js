@@ -1,164 +1,53 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const pool = require("./db-connection/connectionPool");
-const router = express.Router();   
+require('./src/http-status/http_status');
+const express = require('express');
+const bodyParser = require('body-parser');
+const supermarketRoutes = require('./src/routes/supermarkets');
+const categoriesRoutes = require('./src/routes/categories');
+const productsRoutes = require('./src/routes/products');
+const pricesRoutes = require('./src/routes/prices');
+
 const app = express();
 const PORT = 3000;
+const HOST = 'localhost';
+const SUPERMARKETS_ENDPOINT = '/api/supermarkets';
+const CATEGORIES_ENDPOINT = '/api/categories';
+const PRODUCTS_ENDPOINT = '/api/products';
+const PRICES_ENDPOINT = '/api/prices';
 
 
-// app routes 
-router.get('/categories', (req, res) => {
-    if (req.query.productId) {
-        getProductPriceById(req, res);
-    } else {
-        getAllCategories(req, res);
-    }
-});
-
-// app routes 
-router.get('/categories/:categoryId', (req, res) => {
-    getCategoryProducts(req, res);
-});
-
-
-
-
-function getAllCategories(request, response) {
-    //Select the cereals data using JOIN to convert foreign keys into useful data.
-    var sql = "SELECT * FROM category";
-
-    pool.getConnection(function (error, connection) {
-        if (error) {
-            console.log(`Error Getting Connection ${error}`);
-        } else {
-            console.log(`Connection ${connection.threadId} Started`);
-            connection.query(sql, function (error, result) {
-                if (error) {
-                    console.log(`Error Querying database ${error}`)
-                    response.send("Error Fetching Data");
-                } else {
-                    response.json(result);
-                    connection.release();
-                }
-            })
-        }
-    });
-}
-
-function getCategoryById(request, response) {
-    // get id from URI
-    var categoryId = request.params.categoryId;
-
-    //Select the cereals data using JOIN to convert foreign keys into useful data.
-    var sql = `SELECT * FROM category WHERE category_id = ${categoryId}`;
-
-    pool.getConnection(function (error, connection) {
-        if (error) {
-            response.json("Error Connecting to the Database, Please Try Again Later")
-        } else {
-            console.log(`Connection ${connection.threadId} Started`);
-            connection.query(sql, function (error, result) {
-                if (error) {
-                    console.log(`Error Querying database ${error}`)
-                    response.json("Error Fetching Data");
-                } else {
-                    response.json(result);
-                    connection.release();
-                }
-            })
-        }
-
-    });
-}
-
-function getCategoryByName(request, response) {
-    // get id from URI
-    var categoryName = request.query.categoryName;
-
-    //Select the cereals data using JOIN to convert foreign keys into useful data.
-    var sql = `SELECT * FROM category WHERE category_name = '${categoryName}'`;
-
-    pool.getConnection(function (error, connection) {
-        if (error) {
-            response.json("Error Connecting to the Database, Please Try Again Later")
-        } else {
-            console.log(`Connection ${connection.threadId} Started`);
-            connection.query(sql, function (error, result) {
-                if (error) {
-                    console.log(`Error Querying database ${error}`)
-                    response.json("Error Fetching Data");
-                } else {
-                    response.json(result);
-                    connection.release();
-                }
-            })
-        }
-
-    });
-}
-
-function getCategoryProducts(request, response) {
-    // get id from URI
-    var categoryId = request.params.categoryId;
-    var sql = `SELECT * FROM product INNER JOIN category ON category.category_id=product.category_id  WHERE product.category_id=${categoryId}`;
-    pool.getConnection(function (error, connection) {
-        if (error) {
-            response.json("Error Connecting to the Database, Please Try Again Later")
-        } else {
-            console.log(`Connection ${connection.threadId} Started`);
-            connection.query(sql, function (error, result) {
-                if (error) {
-                    console.log(`Error Querying database ${error}`)
-                    response.json("Error Fetching Data");
-                } else {
-                    response.json(result);
-                    connection.release();
-                }
-            })
-        }
-
-    });
-
-}
-
-
-function getProductPriceById(request, response) {
-    // get id from URI
-    var productId = request.query.productId;
-
-    var sql = `SELECT * FROM product INNER JOIN product_price ON product_price.product_id=product.product_id 
-    INNER JOIN supermarket ON supermarket.supermarket_id=product_price.supermarket_id
-    WHERE product.product_id=${productId}`;
-   
-    pool.getConnection(function (error, connection) {
-        if (error) {
-            response.json("Error Connecting to the Database, Please Try Again Later")
-        } else {
-            console.log(`Connection ${connection.threadId} Started`);
-            connection.query(sql, function (error, result) {
-                if (error) {
-                    console.log(`Error Querying database ${error}`)
-                    response.json("Error Fetching Data");
-                } else {
-                    response.json(result);
-                    connection.release();
-                }
-            })
-        }
-
-    });
-
-}
-// middleware 
-app.use(bodyParser.json()); // let the app know that we can get json as post data 
+// app middleware 
+// this will extract data from url 
 app.use(bodyParser.urlencoded({
     extended: true
-})); // this will extract data from url 
+}));
+app.use(bodyParser.json()); // use json data
+// adjust response header to allow Access-Control-Allow-Origin
+// app.use((req, res) => {
+//     res.header('Access-Control-Allow-Origin', '*');
+//     res.header('Access-Control-Allow-Headers', '*');
+// }); 
+// serve static html 
 app.use(express.static('public'));
-// register api routes 
-app.use('/api', router);
 
-// run the app and start listening on port 
+// handel supermarket endpoint requests 
+app.use(SUPERMARKETS_ENDPOINT, supermarketRoutes);
+
+// handel categories endpoint requests 
+app.use(CATEGORIES_ENDPOINT, categoriesRoutes);
+
+// handel products endpoint requests 
+app.use(PRODUCTS_ENDPOINT, productsRoutes);
+
+// handel prices endpoint requests 
+app.use(PRICES_ENDPOINT, pricesRoutes);
+
+// error handler 
+app.use((req, res) => {
+    res.status(HTTP_STATUS.NOT_FOUND);
+    res.send(`${HTTP_STATUS.NOT_FOUND}: Path ${HOST + req.url} Not Found.`);
+});
+
+// run the app and start listening on port 3000
 app.listen(PORT, () => {
     console.log(`App is Up and Running on Port ${PORT}`);
 });
