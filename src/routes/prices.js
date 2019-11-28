@@ -8,15 +8,20 @@ const controller = require('../controllers/pricesController');
 router.get('/', (req, res) => {
     if (req.query.productName) {
         controller.getProductByName(req, res);
+    } else if (req.query.num_items) {
+        controller.getPricesSet(req, res);
     } else {
-        controller.getProducts(req, res);
+        controller.getPrices(req, res);
     }
 });
 
-
 // get category by id 
 router.get('/:productId', (req, res) => {
-    controller.getPriceByProductId(req, res);
+    if (req.query.num_items) {
+        controller.getProductPricesSet(req, res);
+    } else {
+        controller.getPriceByProductId(req, res);
+    }
 });
 
 module.exports = router;

@@ -135,3 +135,20 @@ footer {
     margin-top: 30px;
     margin-bottom: 20px;
 }
+
+
+/* errors and notification styles 
+==================================*/
+.error {
+    color: #D8000C;
+    background-color: #FFBABA;
+}
+
+.main-error {
+    font-size: 24px;
+    padding: 20px;
+}
+
+.current-page {
+    font-weight: bold;
+}

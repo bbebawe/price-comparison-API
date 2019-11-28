@@ -28,7 +28,7 @@
 <body>
     <!-- begin wrapper, wraps header and main, keeps footer and the bottom -->
     <div class="wrapper">
-        <div id="app">
+        <div id="app" v-cloak>
             <!-- Header -->
             <header>
                 <div class="container">
@@ -50,12 +50,13 @@
                                 </div>
                                 <div class="col-sm-6">
                                     <input class="form-control border-secondary border-right-0 rounded-0" type="search"
-                                        v-model:value="searchKeyword" placeholder="What are you looking for today?">
+                                        v-model:value="searchKeyword" placeholder="What are you looking for today?"
+                                        @keyup="search">
                                 </div>
                                 <div class="col-sm-2">
                                     <button
                                         class="btn btn-outline-secondary border-left-0 rounded-0 rounded-right search-btn"
-                                        type="button" @click.prevent="">
+                                        type="button" @click.prevent="search">
                                         <i class="fa fa-search"></i> Search
                                     </button>
                                 </div>
@@ -65,76 +66,193 @@
                 </div>
             </header>
             <main class="container">
-                <!-- categories div -->
-                <div v-if="showCategories == true" class="row justify-content-center">
-                    <h3 class="col-sm-12 main-heading">Browse Products By Category</h3>
-                    <div v-for="category in categories" class="col-sm-3 align-items-center category-block ">
-                        <div class="card category-card ">
-                            <img class="card-img-top" v-bind:src="category.category_image" alt="Card image cap">
-                            <div class="card-body category-name">
-                                <p class="card-text text-center">{{category.category_name}}</p>
+                <!-- display if user did not search -->
+                <div v-if="userSearched == false">
+                    <!-- categories div -->
+                    <div v-if="displayCategories == true" class="row justify-content-center">
+                        <div class="row hero-text">
+                            <div class="col">
+                                <div class="hero-text jumbotron text-center">
+                                    <h3>Search and compare prices from different markets or browse products category
+                                    </h3>
+                                </div>
                             </div>
-                            <button @click.prevent="getCategoryProducts(category.category_id, category.category_name)"
-                                type="button" class="btn btn-outline-info store-btn">View Products</button>
                         </div>
-                    </div>
-                </div>
-                <!-- end categories div -->
-                <!-- category product div -->
-                <div v-if="showCategoryProduct == true" class="row justify-content-center">
-                    <h3 class="col-sm-12 main-heading"> {{ numberOfUniqueProductsInCategory }} Products found in
-                        {{ displayedCategoryName }}
-                        category </h3>
-                    <div v-for="product in categoryProduct" class="col-sm-12 product-block product-item card">
-                        <div class="row">
-                            <div class="col-sm-2 align-self-center">
-                                <img class="product-image " v-bind:src="product.category_image" alt="">
+                        <h3 class="col-sm-12 main-heading">Browse Products By Category</h3>
+                        <div v-for="category in categories" class="col-sm-3 align-items-center category-block ">
+                            <div class="card category-card ">
+                                <img class="card-img-top" v-bind:src="category.category_image" alt="Card image cap">
+                                <div class="card-body category-name">
+                                    <p class="card-text text-center">{{category.category_name}}</p>
+                                </div>
+                                <button
+                                    @click.prevent="getCategoryProducts(category.category_id, category.category_name)"
+                                    type="button" class="btn btn-outline-info store-btn">View Products</button>
                             </div>
-                            <div class="col-sm-8 align-self-center">
-                                <ul class="list-group">
-                                    <li><b>Product Name:</b> {{product.product_name}}</li>
-                                    <li><b>Category:</b> {{product.category_name}}</li>
-                                    <li><b>Product Volume:</b> {{product.product_volume}}</li>
+                        </div>
+                        <div class="col-sm-12">
+                            <div class="row justify-content-center">
+                                <ul class="pagination pagination-centered">
+                                    <li v-bind:class="{'page-item' : true, 'disabled': (currentCategoryPage==0)}"><a
+                                            class="page-link" @click.prevent="prevCategorySet">Previous</a></li>
+                                    <div v-for="(page, index) in categoriesPages">
+                                        <li
+                                            v-bind:class="{'page-item': true, 'active' :(index == currentCategoryPage)}">
+                                            <a class="page-link" @click.prevent="getCategorySet(index)">{{index+1}}</a>
+                                    </div>
+                                    <li
+                                        v-bind:class="{'page-item' : true, 'disabled': (currentCategoryPage == numberOfCategoriesPages-1)}">
+                                        <a class="page-link" @click.prevent="nextCategorySet">Next</a>
+                                    </li>
                                 </ul>
                             </div>
-                            <div class="col-sm-2 align-self-center">
-                                <button @click.prevent="getProductPriceById(product.product_id)" type="button"
-                                    class="btn btn-outline-info store-btn">Compare Price</button>
+                        </div>
+                        <div v-if="fetchError != null">
+                            <p class="error main-error"><i class="far fa-frown"></i> {{fetchError}}</p>
+                        </div>
+                    </div>
+                    <!-- end categories div -->
+
+                    <!-- category products div-->
+                    <div v-if="displayCategoryProducts == true" class="row justify-content-center">
+                        <h3 class="col-sm-12 main-heading">Category Result</h3>
+                        <div v-if="fetchError == null" v-for="product in categoryProducts"
+                            class="col-sm-3 align-items-center category-block ">
+                            <div class="card category-card ">
+                                <img class="card-img-top" v-bind:src="product.category_image" alt="Card image cap">
+                                <div class="card-body category-name">
+                                    <p class="card-text text-center">{{product.product_name}}</p>
+                                </div>
+                                <button @click.prevent="getProductPriceSetById(product.product_id)" type="button"
+                                    class="btn btn-outline-info store-btn">Compare Prices</button>
                             </div>
                         </div>
                     </div>
-                </div>
-                <!-- end category product div -->
-                <!-- product div -->
-                <div v-if="showProductPrice == true" class="row">
-                    <h3 class="col-sm-12 main-heading"> {{ numberOfProductsInCategory }} Products found </h3>
-                    <div v-for="product in productPrice" class="col-sm-12 product-block product-item card">
-                        <div class="row justify-content-center">
-                            <div class="col-sm-2 align-self-center">
-                                <img class="product-image " v-bind:src="product.product_image" alt="">
+
+                    <!-- product div -->
+                    <div v-if="displayProductPrice == true" class="row">
+                        <h3 class="col-sm-12 main-heading"> {{ numberOfProductsInCategory }} Products found </h3>
+                        <div v-for="product in productPrice" class="col-sm-12 product-block product-item card">
+                            <div class="row justify-content-center">
+                                <div class="col-sm-2 align-self-center">
+                                    <img class="product-image " v-bind:src="product.product_image" alt="">
+                                </div>
+                                <div class="col-sm-8">
+                                    <h5> {{product.product_name}}</h5>
+                                    <ul class="list-group">
+                                        <li><b>Product Name:</b> {{product.product_name.toUpperCase()}}</li>
+                                        <li><b>Product Description:</b> {{product.product_description}}</li>
+                                        <li><b>Product Volume:</b> {{product.product_volume}}</li>
+                                        <li><b>Product Price:</b><span v-if="product.product_price > 1">
+                                                £{{product.product_price}}</span><span v-if="product.product_price < 1">
+                                                {{product.product_price * 100}}p</span></li>
+                                        <li><b>Supermarket:</b> {{product.supermarket_name.toUpperCase()}}</li>
+                                    </ul>
+                                </div>
+                                <div class="col-sm-2 align-self-center">
+                                    <img class="img-fluid supermarket-image" v-bind:src="product.supermarket_image"
+                                        alt="">
+                                    <a v-bind:href="product.price_source" target="_blank"><button type="button"
+                                            class="btn btn-outline-info store-btn">Go to Store <i
+                                                class="fas fa-arrow-right"></i></button></a>
+                                </div>
                             </div>
-                            <div class="col-sm-8">
-                                <h5> {{product.product_name}}</h5>
-                                <ul class="list-group">
-                                    <li><b>Product Name:</b> {{product.product_name.toUpperCase()}}</li>
-                                    <li><b>Product Description:</b> {{product.product_description}}</li>
-                                    <li><b>Product Volume:</b> {{product.product_volume}}</li>
-                                    <li><b>Product Price:</b><span v-if="product.product_price > 1">
-                                            £{{product.product_price}}</span><span v-if="product.product_price < 1">
-                                            {{product.product_price * 100}}p</span></li>
-                                    <li><b>Supermarket:</b> {{product.supermarket_name.toUpperCase()}}</li>
+                        </div>
+                        <div class="col-sm-12">
+                            <div class="row justify-content-center">
+                                <ul class="pagination pagination-centered">
+                                    <li v-bind:class="{'page-item' : true, 'disabled': (currentPricePage==0)}"><a
+                                            class="page-link" @click.prevent="prevPriceSet">Previous</a></li>
+                                    <div v-for="(page, index) in pricesPages">
+                                        <li v-bind:class="{'page-item': true, 'active' :(index == currentPricePage)}">
+                                            <a class="page-link" @click.prevent="getPriceSet(index)">{{index+1}}</a>
+                                    </div>
+                                    <li
+                                        v-bind:class="{'page-item' : true, 'disabled': (currentPricePage == numberOfPricesPages-1)}">
+                                        <a class="page-link" @click.prevent="nextPriceSet">Next</a>
+                                    </li>
                                 </ul>
                             </div>
-                            <div class="col-sm-2 align-self-center">
-                                <img class="img-fluid supermarket-image" v-bind:src="product.supermarket_image" alt="">
-                                <a v-bind:href="product.price_source" target="_blank"><button type="button"
-                                        class="btn btn-outline-info store-btn">Go to Store <i
-                                            class="fas fa-arrow-right"></i></button></a>
+                        </div>
+                    </div>
+                    <!-- end product div -->
+                </div>
+                <div v-if="userSearched == true">
+                    <!-- category div-->
+                    <div v-if="displayCategories == true" class="row justify-content-center">
+                        <h3 class="col-sm-12 main-heading">Category Result</h3>
+                        <div v-if="fetchError == null" v-for="category in categories"
+                            class="col-sm-3 align-items-center category-block ">
+                            <div class="card category-card ">
+                                <img class="card-img-top" v-bind:src="category.category_image" alt="Card image cap">
+                                <div class="card-body category-name">
+                                    <p class="card-text text-center">{{category.category_name}}</p>
+                                </div>
+                                <button
+                                    @click.prevent="getSearchCategoryProducts(category.category_id, category.category_name)"
+                                    type="button" class="btn btn-outline-info store-btn">View Products</button>
                             </div>
                         </div>
                     </div>
+                    <!-- end category div -->
+                    <!-- category product div -->
+                    <div v-if="displayProducts == true" class="row justify-content-center">
+                        <h3 class="col-sm-12 main-heading"> {{ numberOfUniqueProductsInCategory }} Products found in
+                            {{ displayedCategoryName }}
+                            category </h3>
+                        <div v-for="product in categoryProducts" class="col-sm-12 product-block product-item card">
+                            <div class="row">
+                                <div class="col-sm-2 align-self-center">
+                                    <img class="product-image " v-bind:src="product.category_image" alt="">
+                                </div>
+                                <div class="col-sm-8 align-self-center">
+                                    <ul class="list-group">
+                                        <li><b>Product Name:</b> {{product.product_name}}</li>
+                                        <li><b>Category:</b> {{product.category_name}}</li>
+                                        <li><b>Product Volume:</b> {{product.product_volume}}</li>
+                                    </ul>
+                                </div>
+                                <div class="col-sm-2 align-self-center">
+                                    <button @click.prevent="getSearchProductPriceSetById(product.product_id)"
+                                        type="button" class="btn btn-outline-info store-btn">Compare Price</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- end category product div -->
+
+                    <!-- product div -->
+                    <div v-if="displayProductPrices == true" class="row">
+                        <h3 class="col-sm-12 main-heading"> {{ numberOfProductsInCategory }} Products found </h3>
+                        <div v-for="product in productPrice" class="col-sm-12 product-block product-item card">
+                            <div class="row justify-content-center">
+                                <div class="col-sm-2 align-self-center">
+                                    <img class="product-image " v-bind:src="product.product_image" alt="">
+                                </div>
+                                <div class="col-sm-8">
+                                    <h5> {{product.product_name}}</h5>
+                                    <ul class="list-group">
+                                        <li><b>Product Name:</b> {{product.product_name.toUpperCase()}}</li>
+                                        <li><b>Product Description:</b> {{product.product_description}}</li>
+                                        <li><b>Product Volume:</b> {{product.product_volume}}</li>
+                                        <li><b>Product Price:</b><span v-if="product.product_price > 1">
+                                                £{{product.product_price}}</span><span v-if="product.product_price < 1">
+                                                {{product.product_price * 100}}p</span></li>
+                                        <li><b>Supermarket:</b> {{product.supermarket_name.toUpperCase()}}</li>
+                                    </ul>
+                                </div>
+                                <div class="col-sm-2 align-self-center">
+                                    <img class="img-fluid supermarket-image" v-bind:src="product.supermarket_image"
+                                        alt="">
+                                    <a v-bind:href="product.price_source" target="_blank"><button type="button"
+                                            class="btn btn-outline-info store-btn">Go to Store <i
+                                                class="fas fa-arrow-right"></i></button></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- end product div -->
                 </div>
-                <!-- end product div -->
             </main>
         </div>
     </div>

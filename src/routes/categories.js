@@ -9,8 +9,11 @@ const controller = require('./../controllers/categoriesController');
 router.get('/', (req, res) => {
     if (req.query.categoryName) {
         controller.getCategoryByName(req, res);
-    }
-    else {
+    } else if (req.query.num_items) {
+        controller.getCategorySet(req, res);
+    } else if (req.query.searchTerm) {
+        controller.queryCategories(req, res);
+    } else {
         controller.getCategories(req, res);
     }
 });

@@ -8,6 +8,10 @@ const controller = require('./../controllers/productsController');
 router.get('/', (req, res) => {
     if (req.query.productName) {
         controller.getProductByName(req, res);
+    } else if (req.query.num_items) {
+        controller.getProductsSet(req, res);
+    } else if (req.query.searchTerm) {
+        controller.queryProducts(req, res);
     } else {
         controller.getProducts(req, res);
     }
