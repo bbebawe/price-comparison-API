@@ -6,7 +6,7 @@ var pool = mysql.createPool({
     connectionLimit: 100,
     host: "localhost",
     user: "root",
-    password: "root",
+    password: "root", // change back to root 
     database: "price_comparison",
     debug: false
 });

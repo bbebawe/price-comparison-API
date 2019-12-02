@@ -4,12 +4,12 @@ const controller = require('./../controllers/supermarketController');
 
 // handel supermarkets end point to get all supermarkets or get supermarket by id 
 router.get('/', (req, res) => {
-    if (req.query.supermarketName) {
+    if (req.query.supermarket_name) {
         controller.getSupermarketByName(req, res);
     } else {
         controller.getSupermarkets(req, res);
     }
-}); 
+});
 
 // get supermarket by id 
 router.get('/:supermarketId', (req, res) => {

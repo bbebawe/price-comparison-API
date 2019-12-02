@@ -56,10 +56,10 @@ footer {
 
 .product-image {
     display: inline-block;
-    width: 120px;
-    height: 1200px;
-    max-width: 120px;
-    max-height: 120px;
+    width: 80px;
+    height: 90px;
+    max-width: 80px;
+    max-height: 90px;
     margin: auto;
 }
 
@@ -99,6 +99,8 @@ footer {
     border-radius: 15px;
     margin-bottom: 20px;
     box-shadow: #2e4056 0 0 5px;
+    color:#183D5A;
+
 }
 
 .category-card img {
@@ -147,8 +149,29 @@ footer {
 .main-error {
     font-size: 24px;
     padding: 20px;
+    text-align: center;
 }
 
 .current-page {
     font-weight: bold;
+}
+
+.supermarket-card {
+    margin-top: 20px;
+    border-radius: 50px;
+    box-shadow: #2e4056 0 0 10px;
+    color:#183D5A;
+    margin-bottom: 20px;
+
+}
+.supermarket-card img {
+    height: 40px;
+    max-height: 40px;
+    max-width: 80%;
+    margin: 20px auto 5px auto ;
+    padding-top: 5px;
+}
+
+.hero-text {
+    font-family: 'Acme', sans-serif;
 }

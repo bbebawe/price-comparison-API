@@ -8,7 +8,11 @@ var vm = new Vue({
         displayProducts: false,
         displayProductPrices: false,
 
+        supermarkets: null,
+        supermarketsFetchError: null,
+
         categories: null,
+        categoriesFetchError: null,
         categoryProducts: null,
         displayedCategoryName: null,
         productPrice: null,
@@ -37,20 +41,32 @@ var vm = new Vue({
 
     },
     mounted: function () {
-        axios.get('api/categories?num_items=4&offset=0').then(function (res) {
+        // get categories 
+        axios.get('api/categories?num_items=4&offset=0').then(function (response) {
+            vm.categoriesFetchError = null; 
             vm.userSearched = false;
             vm.displayCategories = true;
             vm.displayCategoryProducts = false;
             vm.displayProductPrice = false;
-            vm.categories = res.data.result;
-            vm.numberOfCategories = res.data.numberOfItems;
+            vm.categories = response.data.result;
+            vm.numberOfCategories = response.data.numberOfItems;
             vm.numberOfCategoriesPages = Math.ceil(vm.numberOfCategories / 4);
             vm.currentCategoryPage = 0;
             vm.categoriesPages = [];
             for (var i = 0; i < vm.numberOfCategoriesPages; i++) {
                 vm.categoriesPages.push(i);
             }
-            vm.fetchError = null;
+        }).catch((error) => {
+            vm.categories = null;
+            vm.categoriesFetchError = error;
+        });
+        // get supermarkets 
+        axios.get('/api/supermarkets').then((response) => {
+            vm.supermarketsFetchError = null;
+            vm.supermarkets = response.data;
+        }).catch((error) => {
+            vm.supermarkets = null;
+            vm.supermarketsFetchError = error;
         });
     },
     methods: {
@@ -212,8 +228,8 @@ var vm = new Vue({
                 console.log(vm.pricesPages.length);
                 vm.fetchError = null;
             });
-        }, 
-        getSearchCategoryProducts: function(category_id, category_name) {
+        },
+        getSearchCategoryProducts: function (category_id, category_name) {
             axios.get(`api/categories/${category_id}/products`).then(function (res) {
                 vm.userSearched = true;
                 vm.displayCategories = false;
@@ -223,8 +239,8 @@ var vm = new Vue({
                 console.log(vm.categoryProducts);
                 vm.displayedCategoryName = category_name;
             });
-        }, 
-        getSearchProductPriceSetById: function(product_id) {
+        },
+        getSearchProductPriceSetById: function (product_id) {
             axios.get(`api/prices/${product_id}?num_items=4&offset=0`).then(function (res) {
                 vm.userSearched = true;
                 vm.displayCategories = false;

@@ -13,6 +13,7 @@
     <!-- bootstrap production cdn -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Acme&display=swap" rel="stylesheet">
     <!-- Axios library cdn -->
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <!-- CSS external stylesheet -->
@@ -68,17 +69,30 @@
             <main class="container">
                 <!-- display if user did not search -->
                 <div v-if="userSearched == false">
-                    <!-- categories div -->
+                    <!-- supermarkets row -->
                     <div v-if="displayCategories == true" class="row justify-content-center">
-                        <div class="row hero-text">
-                            <div class="col">
-                                <div class="hero-text jumbotron text-center">
-                                    <h3>Search and compare prices from different markets or browse products category
-                                    </h3>
+                        <h3 class="col-sm-12 hero-text jumbotron text-center">Search and Compare Prices from your
+                            Favorite Supermarket</h3>
+                        <div v-if="supermarketsFetchError == null" v-for="supermarket in supermarkets"
+                            class="col-sm-2 align-items-center category-block ">
+                            <div class="card supermarket-card">
+                                <img class="card-img-top" v-bind:src="supermarket.supermarket_image"
+                                    alt="Card image cap">
+                                <div class="card-body category-name">
+                                    <!-- <p class="card-text text-center">{{supermarket.supermarket_name}}</p> -->
                                 </div>
                             </div>
                         </div>
-                        <h3 class="col-sm-12 main-heading">Browse Products By Category</h3>
+                        <div v-if="supermarketsFetchError != null">
+                            <p class="error main-error"><i class="far fa-frown"></i> {{supermarketsFetchError}}</p>
+                        </div>
+                    </div>
+                    <!-- end supermarkets div -->
+
+                    <!-- categories div -->
+                    <div v-if="displayCategories == true" class="row justify-content-center">
+                        <h3 class="col-sm-12 hero-text jumbotron text-center">Alternatively, Browse Products By Category
+                        </h3>
                         <div v-for="category in categories" class="col-sm-3 align-items-center category-block ">
                             <div class="card category-card ">
                                 <img class="card-img-top" v-bind:src="category.category_image" alt="Card image cap">
@@ -107,8 +121,8 @@
                                 </ul>
                             </div>
                         </div>
-                        <div v-if="fetchError != null">
-                            <p class="error main-error"><i class="far fa-frown"></i> {{fetchError}}</p>
+                        <div v-if="categoriesFetchError != null">
+                            <p class="error main-error"><i class="far fa-frown"></i> {{categoriesFetchError}}</p>
                         </div>
                     </div>
                     <!-- end categories div -->
@@ -135,18 +149,18 @@
                         <div v-for="product in productPrice" class="col-sm-12 product-block product-item card">
                             <div class="row justify-content-center">
                                 <div class="col-sm-2 align-self-center">
-                                    <img class="product-image " v-bind:src="product.product_image" alt="">
+                                    <img class="product-image" v-bind:src="product.product_image" alt="">
                                 </div>
                                 <div class="col-sm-8">
                                     <h5> {{product.product_name}}</h5>
                                     <ul class="list-group">
-                                        <li><b>Product Name:</b> {{product.product_name.toUpperCase()}}</li>
+                                        <li><b>Product Name:</b> {{product.product_name}}</li>
                                         <li><b>Product Description:</b> {{product.product_description}}</li>
                                         <li><b>Product Volume:</b> {{product.product_volume}}</li>
                                         <li><b>Product Price:</b><span v-if="product.product_price > 1">
                                                 £{{product.product_price}}</span><span v-if="product.product_price < 1">
                                                 {{product.product_price * 100}}p</span></li>
-                                        <li><b>Supermarket:</b> {{product.supermarket_name.toUpperCase()}}</li>
+                                        <li><b>Supermarket:</b> {{product.supermarket_name}}</li>
                                     </ul>
                                 </div>
                                 <div class="col-sm-2 align-self-center">

@@ -172,30 +172,22 @@ module.exports = {
             connection.query(sql2, function (error, result) {
                 numberOfItems = result[0]['COUNT(*)'];
             });
-        });
-        pool.getConnection(function (error, connection) {
-            if (error) {
-                console.log(error);
-                response.status(HTTP_STATUS.INTERNAL_SERVER_ERROR);
-                response.json(`Error ${HTTP_STATUS.INTERNAL_SERVER_ERROR} : Internal Server Error, Please Try Again Later`);
-            } else {
-                console.log(`Connection ${connection.threadId} Started`);
-                connection.query(sql, function (error, result) {
-                    if (result.length != 0) {
-                        response.status(HTTP_STATUS.OK);
-                        resultObj.numberOfItems = numberOfItems;
-                        resultObj.result = result;
-                        response.json(resultObj);
-                    } else {
-                        response.status(HTTP_STATUS.NOT_FOUND);
-                        response.json({
-                            'error': true,
-                            'message': `Error ${HTTP_STATUS.NOT_FOUND}: Error in Path ${HOST+ CATEGORIES_ENDPOINT +request.url}`
-                        });
-                    }
-                });
-                connection.release();
-            }
+            connection.query(sql, function (error, result) {
+                if (result.length != 0) {
+                    response.status(HTTP_STATUS.OK);
+                    resultObj.numberOfItems = numberOfItems;
+                    resultObj.result = result;
+                    response.json(resultObj);
+                } else {
+                    response.status(HTTP_STATUS.NOT_FOUND);
+                    response.json({
+                        'error': true,
+                        'message': `Error ${HTTP_STATUS.NOT_FOUND}: Error in Path ${HOST+ CATEGORIES_ENDPOINT +request.url}`
+                    });
+                }
+            });
+            connection.release();
+
         });
     }
 }

@@ -22,10 +22,11 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json()); // use json data
 // adjust response header to allow Access-Control-Allow-Origin
-// app.use((req, res) => {
-//     res.header('Access-Control-Allow-Origin', '*');
-//     res.header('Access-Control-Allow-Headers', '*');
-// }); 
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', '*');
+    next(); 
+}); 
 // serve static html 
 app.use(express.static('public'));
 

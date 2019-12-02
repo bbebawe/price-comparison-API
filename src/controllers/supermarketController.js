@@ -11,14 +11,25 @@ module.exports = {
         pool.getConnection(function (error, connection) {
             if (error) {
                 response.status(HTTP_STATUS.INTERNAL_SERVER_ERROR);
-                response.send(`${HTTP_STATUS.INTERNAL_SERVER_ERROR}: Internal Server Error, Please Try Again Later`);
-            } else {
-                console.log(`Connection ${connection.threadId} Started`);
-                connection.query(sql, function (error, result) {
-                    response.status(HTTP_STATUS.OK);
-                    response.json(result);
+                response.json({
+                    'error': true,
+                    'message': `Error ${HTTP_STATUS.INTERNAL_SERVER_ERROR}: Internal Server Error, Please Try Again Later`
                 });
+                return;
             }
+            console.log(`Connection ${connection.threadId} Started`);
+            connection.query(sql, function (error, result) {
+                if (error) {
+                    response.status(HTTP_STATUS.INTERNAL_SERVER_ERROR);
+                    response.json({
+                        'error': true,
+                        'message': `Error ${HTTP_STATUS.INTERNAL_SERVER_ERROR}: Internal Server Error, Please Try Again Later ${error}`
+                    });
+                    return;
+                }
+                response.status(HTTP_STATUS.OK);
+                response.json(result);
+            });
             connection.release();
         });
     },
@@ -29,25 +40,28 @@ module.exports = {
             let sql = `SELECT * FROM supermarket WHERE supermarket_id = ${supermarketId}`;
             pool.getConnection(function (error, connection) {
                 if (error) {
-                    console.log(error);
                     response.status(HTTP_STATUS.INTERNAL_SERVER_ERROR);
-                    response.json(`Error ${HTTP_STATUS.INTERNAL_SERVER_ERROR} : Internal Server Error, Please Try Again Later`);
-                } else {
-                    console.log(`Connection ${connection.threadId} Started`);
-                    connection.query(sql, function (error, result) {
-                        if (result.length != 0) {
-                            response.status(HTTP_STATUS.OK);
-                            response.json(result);
-                        } else {
-                            response.status(HTTP_STATUS.NOT_FOUND);
-                            response.json({
-                                'error': true,
-                                'message': `Error ${HTTP_STATUS.NOT_FOUND}: Could not find Supermarket with id ${supermarketId} in Path ${HOST+ SUPERMARKET_ENDPOINT +request.url}`
-                            });
-                        }
+                    response.json({
+                        'error': true,
+                        'message': `Error ${HTTP_STATUS.INTERNAL_SERVER_ERROR}: Internal Server Error, Please Try Again Later`
                     });
-                    connection.release();
+                    return;
                 }
+                console.log(`Connection ${connection.threadId} Started`);
+                connection.query(sql, function (error, result) {
+                    if (result.length != 0) {
+                        response.status(HTTP_STATUS.OK);
+                        response.json(result);
+                        console.log(result[0].supermarket_id);
+                    } else {
+                        response.status(HTTP_STATUS.NOT_FOUND);
+                        response.json({
+                            'error': true,
+                            'message': `Error ${HTTP_STATUS.NOT_FOUND}: Could not find Supermarket with id ${supermarketId} in Path ${HOST+ SUPERMARKET_ENDPOINT +request.url}`
+                        });
+                    }
+                });
+                connection.release();
             });
         } else {
             response.status(HTTP_STATUS.NOT_FOUND);
@@ -55,33 +69,38 @@ module.exports = {
                 'error': true,
                 'message': `Error ${HTTP_STATUS.NOT_FOUND}: Invalid Supermarket Id in Path ${HOST+ SUPERMARKET_ENDPOINT +request.url}`
             });
+            
         }
+        
+
     },
     getSupermarketByName: function (request, response) {
         // get id from URI
-        let supermarketName = request.query.supermarketName;
-        let sql = `SELECT * FROM supermarket WHERE supermarket_name = '${supermarketName}'`;
+        let supermarketName = request.query.supermarket_name;
+        let sql = `SELECT * FROM supermarket WHERE supermarket_name LIKE '%${supermarketName}%'`;
         pool.getConnection(function (error, connection) {
             if (error) {
-                console.log(error);
                 response.status(HTTP_STATUS.INTERNAL_SERVER_ERROR);
-                response.json(`Error ${HTTP_STATUS.INTERNAL_SERVER_ERROR} : Internal Server Error, Please Try Again Later`);
-            } else {
-                console.log(`Connection ${connection.threadId} Started`);
-                connection.query(sql, function (error, result) {
-                    if (result.length != 0) {
-                        response.status(HTTP_STATUS.OK);
-                        response.json(result);
-                    } else {
-                        response.status(HTTP_STATUS.NOT_FOUND);
-                        response.json({
-                            'error': true,
-                            'message': `Error ${HTTP_STATUS.NOT_FOUND}: Could not find Supermarket with name ${supermarketName} in Path ${HOST+ SUPERMARKET_ENDPOINT +request.url}`
-                        });
-                    }
+                response.json({
+                    'error': true,
+                    'message': `Error ${HTTP_STATUS.INTERNAL_SERVER_ERROR}: Internal Server Error, Please Try Again Later`
                 });
-                connection.release();
+                return;
             }
+            console.log(`Connection ${connection.threadId} Started`);
+            connection.query(sql, function (error, result) {
+                if (result.length != 0) {
+                    response.status(HTTP_STATUS.OK);
+                    response.json(result);
+                } else {
+                    response.status(HTTP_STATUS.NOT_FOUND);
+                    response.json({
+                        'error': true,
+                        'message': `Error ${HTTP_STATUS.NOT_FOUND}: Could not find Supermarket with name ${supermarketName} in Path ${HOST+ SUPERMARKET_ENDPOINT +request.url}`
+                    });
+                }
+            });
+            connection.release();
         });
     },
 }
