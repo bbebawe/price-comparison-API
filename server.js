@@ -1,21 +1,24 @@
+// require https status code 
 require('./src/http-status/http_status');
+// require node modules 
 const express = require('express');
 const bodyParser = require('body-parser');
 const supermarketRoutes = require('./src/routes/supermarkets');
 const categoriesRoutes = require('./src/routes/categories');
 const productsRoutes = require('./src/routes/products');
 const pricesRoutes = require('./src/routes/prices');
-
+// create app that is instance of express  
 const app = express();
 const PORT = 3000;
 const HOST = 'localhost';
+// REST api endpoints 
 const SUPERMARKETS_ENDPOINT = '/api/supermarkets';
 const CATEGORIES_ENDPOINT = '/api/categories';
 const PRODUCTS_ENDPOINT = '/api/products';
 const PRICES_ENDPOINT = '/api/prices';
 
 
-// app middleware 
+// add app middleware 
 // this will extract data from url 
 app.use(bodyParser.urlencoded({
     extended: true
